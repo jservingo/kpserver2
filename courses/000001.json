@@ -1,0 +1,37 @@
+{
+    "id": 1,
+    "title": "Matematicas - Curso de Prueba",
+    "units": [
+        {
+            "id": 1,
+            "title": "Clasificacion de los Números - Unidad 1",
+            "pages": [{"id": 1, "title":"P1-1"},{"id": 2, "title":"P1-2"},{"id": 3, "title":"P1-3"}]
+
+        }, 
+        {
+            "id": 2,
+            "title": "Clasificacion de los Números - Unidad 2",
+            "pages": [{"id": 1, "title":"P2-1"},{"id": 2, "title":"P2-2"},{"id": 3, "title":"P2-3"}]
+        }, 
+        {
+            "id": 3,
+            "title": "Unidad 3",
+            "pages": [{"id": 1, "title":"P3-1"},{"id": 2, "title":"P3-2"},{"id": 3, "title":"P3-3"}]
+        }, 
+        {
+            "id": 4,
+            "title": "Unidad 4",
+            "pages": [{"id": 1, "title":"P4-1"},{"id": 2, "title":"P4-2"},{"id": 3, "title":"P4-3"}]
+        }, 
+        {
+            "id": 5,
+            "title": "Unidad 5",
+            "pages": [{"id": 1, "title":"P5-1"},{"id": 2, "title":"P5-2"},{"id": 3, "title":"P5-3"}]
+        }, 
+        {
+            "id": 6,
+            "title": "Unidad 6",
+            "pages": [{"id": 1, "title":"P6-1"},{"id": 2, "title":"P6-2"},{"id": 3, "title":"P6-3"}]
+        }
+    ]
+}

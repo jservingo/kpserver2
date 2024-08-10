@@ -1,0 +1,31 @@
+{
+    "id": 1,
+    "username": "demo",
+    "courses": [
+        {
+            "id": 1,
+            "title": "Matematicas - Curso gratis"        
+        }, 
+        {
+            "id": 2,
+            "title": "Ingles - Curso gratis"
+        }, 
+        {
+            "id": 3,
+            "title": "Fisica - Curso gratis"
+        }, 
+        {
+            "id": 4,
+            "title": "Química - Curso gratis"
+        }, 
+        {
+            "id": 5,
+            "title": "Francés - Curso gratis"
+        }, 
+        {
+            "id": 6,
+            "title": "Otro - Curso gratis"
+        }
+
+    ]
+}
