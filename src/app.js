@@ -9,7 +9,6 @@ const auth = require('./routes/auth.js');
 const admin = require('./routes/admin.js');
 const courses = require('./routes/courses.js');
 const kcourses = require('./routes/kcourses.js');
-//const error = require('./net/errors.js');
 const validateToken = require('./middlewares/validateToken.js')
 //const validateToken = require('./middlewares/validate-token.js')
 
@@ -33,7 +32,5 @@ app.use('/api/admin', admin);
 app.use('/api/courses', courses);
 app.use('/api/kcourses', validateToken, kcourses);
 //app.use('/api/courses', courses);
-
-//app.use(error);
 
 module.exports = app;
