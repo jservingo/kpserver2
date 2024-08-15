@@ -8,9 +8,10 @@ const cors = require('cors');
 const auth = require('./routes/auth.js');
 const admin = require('./routes/admin.js');
 const courses = require('./routes/courses.js');
-//const kp = require('./routes/kp.js');
-const error = require('./net/errors.js');
-const validateToken = require('./middlewares/validate-token.js')
+const kcourses = require('./routes/kcourses.js');
+//const error = require('./net/errors.js');
+const validateToken = require('./middlewares/validateToken.js')
+//const validateToken = require('./middlewares/validate-token.js')
 
 const app = express();
 
@@ -30,9 +31,9 @@ app.set('port', config.app.port);
 app.use('/api/user', auth);
 app.use('/api/admin', admin);
 app.use('/api/courses', courses);
-//app.use('/api/courses', validateToken, courses);
-//app.use('/api/kp/', kp);
+app.use('/api/kcourses', validateToken, kcourses);
+//app.use('/api/courses', courses);
 
-app.use(error);
+//app.use(error);
 
 module.exports = app;

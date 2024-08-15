@@ -3,7 +3,6 @@ const router = express.Router();
 //const controller = require('../controllers/courses.js');
 
 const fs = require('fs');
-const { Mongoose, default: mongoose } = require('mongoose');
 path = require('path');
 
 router.get('/', get_all_courses);
