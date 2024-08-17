@@ -25,9 +25,10 @@ async function get_all_courses(req, res, next) {
 }
 
 async function get_course(req, res, next) {
+    //console.log(req.params.id)
     const course = await Course.aggregate([
         // Falta mostrar progress y scores del usuario en course, units y pages
-        {   $match: {"_id": new mongoose.Types.ObjectId("66b3a133d2dcd543e3d44397")}},
+        {   $match: {"_id": new mongoose.Types.ObjectId(req.params.id)}},
         {
             $lookup: {
                 "from": "units",
@@ -88,7 +89,7 @@ async function get_course(req, res, next) {
 async function get_page(req, res, next) {
     const page = await Page.aggregate([
         // Falta mostrar progress y scores del usuario en course, units y pages
-        {   $match: {"_id": new mongoose.Types.ObjectId("66b3c74051d835d1c6424aaa")}},
+        {   $match: {"_id": new mongoose.Types.ObjectId(req.params.id)}},
         {
             $lookup: {
                 "from": "cards",

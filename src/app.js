@@ -28,7 +28,7 @@ app.set('port', config.app.port);
 
 // Rutas
 app.use('/api/user', auth);
-app.use('/api/admin', admin);
+app.use('/api/admin', validateToken, admin);
 app.use('/api/courses', courses);
 app.use('/api/kcourses', validateToken, kcourses);
 //app.use('/api/courses', courses);
