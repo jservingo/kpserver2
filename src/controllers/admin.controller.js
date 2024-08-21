@@ -6,9 +6,9 @@ const Page = require('../models/page');
 const Card = require('../models/card');
 const Item = require('../models/item');
 
-async function add_course_subscriber(req, res, next) {
+async function add_subscriber(req, res, next) {
     const course = await Course.findById(req.body.id_course)
-    course.subscribers.push(new mongoose.Types.ObjectId("66b01773002dd2f287caff97"))
+    course.subscribers.push(new mongoose.Types.ObjectId(req.uid))
     course.save()
     res.json({error:false})
 }
@@ -18,6 +18,7 @@ async function add_course_subscriber(req, res, next) {
 // **********************************************************
 
 async function get_all_courses(req, res, next) {
+    //FALTA: Obtener cursos donde el autor sea el usuario logeado
     const courses = await Course.find({
         author: new mongoose.Types.ObjectId("66b12d84a442c9b26a6ad69b")
     })
@@ -256,7 +257,7 @@ async function create_item(req, res, next) {
 }
 
 module.exports = {
-    add_course_subscriber,
+    add_subscriber,
     get_all_courses, 
     get_course, 
     get_page,
