@@ -13,10 +13,9 @@ const unitSchema = mongoose.Schema({
         max: 255
     },
     pages: [{ type: mongoose.Types.ObjectId, ref: "Page" }],
-    progress: [{ type: mongoose.Types.ObjectId, ref: "Progress" }],
-    scores: [{ type: mongoose.Types.ObjectId, ref: "Score" }],
     author: { type: mongoose.Types.ObjectId, ref: 'User' },
-    date: { type: Date, defautl: Date.now }
+    created: { type: Date, defautl: Date.now }, 
+    advance: []
 })
 
 module.exports = mongoose.model('Unit',unitSchema);

@@ -10,7 +10,7 @@ const itemSchema = mongoose.Schema({
     text: { type: String },
     url: { type: String },
     author: { type: mongoose.Types.ObjectId, ref: 'User' },
-    date: { type: Date, defautl: Date.now }
+    created: { type: Date, defautl: Date.now }
 })
 
 module.exports = mongoose.model('Item',itemSchema);

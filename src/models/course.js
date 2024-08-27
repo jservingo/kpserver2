@@ -8,11 +8,10 @@ const courseSchema = mongoose.Schema({
         max: 255
     },
     units: [{ type: mongoose.Types.ObjectId, ref: "Unit" }],
-    progress: [{ type: mongoose.Types.ObjectId, ref: "Progress" }],
-    scores: [{ type: mongoose.Types.ObjectId, ref: "Score" }],
-    subscribers: [{ type: mongoose.Types.ObjectId, ref: "User" }], 
     author: { type: mongoose.Types.ObjectId, ref: 'User' },
-    date: { type: Date, defautl: Date.now }
+    created: { type: Date, defautl: Date.now },
+    subscribers: [{ type: mongoose.Types.ObjectId, ref: "User" }], 
+    advance: []
 })
 
 module.exports = mongoose.model('Course',courseSchema);

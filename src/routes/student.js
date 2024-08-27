@@ -9,5 +9,6 @@ router.get('/course/:id', controller.get_course);
 router.get('/page/:id', controller.get_page);
 //router.get('/card', controller.get_card);
 router.post('/protected', controller.infoUser);
+router.post('/subscription/add/:id', controller.add_subscription);
 
 module.exports = router;

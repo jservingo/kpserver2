@@ -19,6 +19,11 @@ const userSchema = mongoose.Schema({
         min: 6,
         max: 255
     },
+    subscriptions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subscription',
+        required: true
+    }], 
     date: {
         type: Date,
         defautl: Date.now

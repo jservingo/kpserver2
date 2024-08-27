@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/admin.controller.js');
 
-router.post('/subscriber/add', controller.add_subscriber);
-
 router.post('/course/create', controller.create_course);
 router.post('/unit/create', controller.create_unit);
 router.post('/page/create', controller.create_page);

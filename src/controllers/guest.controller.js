@@ -8,7 +8,7 @@ const Item = require('../models/item');
 
 async function get_all_courses(req, res, next) {
     //Obtener todos los cursos 
-    const courses = await Course.find({});
+    const courses = await Course.find({}).sort({created: -1});
     res.json({error:false, courses});
 }
 
@@ -47,7 +47,7 @@ async function get_course(req, res, next) {
         {
             $group: {
                 _id: null,
-                title : { $first: '$title' },
+                title: { $first: '$title' },
                 units: {
                     $push: "$units"
                 }
