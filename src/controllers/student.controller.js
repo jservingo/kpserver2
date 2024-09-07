@@ -8,6 +8,15 @@ const Card = require('../models/card');
 const Item = require('../models/item');
 
 async function add_subscription(req, res, next) {
+    /*
+    const user = await User.findById(new mongoose.Types.ObjectId(req.uid))
+        .populate({ 
+            path: 'subscriptions', 
+            match: {
+                course: new mongoose.Types.ObjectId(req.params.id)
+            }
+        });
+    */
     //Suscribir curso al usuario logeado 
     const subscription = new Subscription({
         date: "2024-05-09T21:53:43.00000Z",
