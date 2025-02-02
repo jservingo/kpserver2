@@ -28,6 +28,7 @@ async function add_subscription(req, res, next) {
 }
 
 async function get_subscriptions(req, res, next) {
+    //Este es un cambio para probar que todo va bien
     //Obtener todos los cursos a los cuales el usuario esta suscrito
     const query = `SELECT S.last_date, C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
         FROM subscriptions S 
