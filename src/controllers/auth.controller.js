@@ -1,64 +1,59 @@
-const User = require('../models/user');
-const Joi = require('@hapi/joi');
+const mysql = require('mysql2');
+const config = require('../config.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const schemaRegister = Joi.object({
-    name: Joi.string().min(3).max(255).required(),
-    email: Joi.string().min(6).max(255).required().email(),
-    password: Joi.string().min(6).max(255).required(),
-})
-
-const schemaLogin = Joi.object({
-    email: Joi.string().min(6).max(255).required().email(),
-    password: Joi.string().min(6).max(255).required(),
-})
+const sql = mysql.createPool({
+    host: config.mysql.host,
+    user: config.mysql.user,
+    password: config.mysql.password,
+    database: config.mysql.database,
+	port: config.mysql.port
+}).promise();
 
 async function login(req, res, next) {
-    const { error } = schemaLogin.validate(req.body);
-    if (error) return res.status(400).json({error:true, mensaje:error.details[0].message})
+	const query = 'SELECT * FROM users WHERE email=?'
+	const [rows] = await sql.query(query,[req.body.email]);
+	const user = rows[0]
+	//console.log(req.body.email);
+	//console.log(user)
+	if (!user) return res.status(400).json({error:true, mensaje:'Usuario no registrado'})
+	
+	const passwordValid = await bcrypt.compare(req.body.password, user.password)
+	if (!passwordValid) return res.status(400).json({error:true, mensaje:'La contraseña no es válida'})     
 
-    const user = await User.findOne({email: req.body.email})
-    if (!user) return res.status(400).json({error:true, mensaje:'Usuario no registrado'}) 
+	const token = jwt.sign({
+		name: user.name,
+		id: user.id
+	},process.env.TOKEN_SECRET)
 
-    const passwordValid = await bcrypt.compare(req.body.password, user.password)
-    if (!passwordValid) return res.status(400).json({error:true, mensaje:'La contraseña no es válida'})     
-
-    const token = jwt.sign({
-        name: user.name,
-        id: user._id
-    },process.env.TOKEN_SECRET)
-
-    res.header('auth-token',token).json({
-        error: false,
-        data: {token},
-        user: {name: user.name, id: user._id}
-    })
+	res.header('auth-token',token).json({
+		error: false,
+		data: {token},
+		user: {name: user.name, id: user.id}
+	})
 }
 
 async function register(req, res, next) {
-    const { error } = schemaRegister.validate(req.body);
-    if (error) return res.status(400).json({error:true,mensaje:error.details[0].message})
-
-    const existsEmail = await User.findOne({email: req.body.email})
-    if (existsEmail) return res.status(400).json({error:true, mensaje:'Este email ya está registrado'})
+	const query = 'SELECT * FROM users WHERE email=?'	
+	//console.log(query);
+	const [rows] = await sql.query(query,[req.body.email]);
+	const user = rows[0]
+	if (user) return res.status(400).json({error:true, mensaje:'Este email ya está registrado'})
 
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(req.body.password, salt);
+	//console.log(password);
 
-    const user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        password
-    })
+	const queryInsert = 'INSERT INTO users(name,email,password) VALUES (?,?,?)'
+	const [result] = await sql.query(queryInsert,[req.body.name,req.body.email,password]);
+	//console.log(result)
 
-    try {
-        const userDB = await user.save();
-        res.json({error:false, user:userDB})
-
-    } catch (error) {
-        res.status(400).json(error)
-    }
+	res.json({error: false, user:{
+		"name": req.body.name,
+		"email": req.body.email,
+		"_id": result.insertId}
+	});
 }
 
 module.exports = {

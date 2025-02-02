@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
 const morgan = require('morgan');
 const config = require('./config.js');
@@ -13,10 +12,6 @@ const validateToken = require('./middlewares/validateToken.js')
 
 const app = express();
 
-// Capturar body
-app.use(bodyparser.urlencoded({extended: false}));
-app.use(bodyparser.json())
-
 // Middleware
 app.use(cors());
 app.use(morgan('dev'));
@@ -25,10 +20,24 @@ app.use(express.json());
 // Configuracion 
 app.set('port', config.app.port);
 
+/*
+function handle404(req, res, next) {
+    res.status(404);
+  
+    if (req.accepts('html')) {
+      res.render('error', { message: 'Oops! Page not found.' });
+    } else {
+      res.json({ message: 'Oops! Page not found.' });
+    }
+}
+*/
+  
 // Rutas
 app.use('/api/user', auth);
 app.use('/api/guest', guest);
-app.use('/api/student', validateToken, student);
+app.use('/api/student', validateToken, student); 
 app.use('/api/admin', validateToken, admin);
+app.use('/uploads',express.static('uploads'));
+//app.use(handle404);
 
 module.exports = app;
