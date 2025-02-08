@@ -12,16 +12,18 @@ const sql = mysql.createPool({
 
 async function add_subscription(req, res, next) {
     //Verificar que el usuario no se haya registrado al curso
+    /*
     const query = 'SELECT * FROM subscriptions WHERE id_user=? AND id_course=?'	
 	//console.log(query);
 	const [rows] = await sql.query(query,[req.uid,req.params.id]);
 	const subscription = rows[0]
 	if (subscription) return res.status(400).json({error:true, mensaje:'Ya está suscrito a este curso'})
+    */
     //Insertar en courses_users
-    const queryCourses = 'INSERT INTO courses_users(id_user,id_course) VALUES (?,?)'
+    const queryCourses = 'INSERT IGNORE INTO courses_users(id_user,id_course) VALUES (?,?)'
 	const [result2] = await sql.query(queryCourses,[req.uid,req.params.id]);
     //Suscribir curso al usuario logeado 
-    const queryInsert = 'INSERT INTO subscriptions(id_user,id_course) VALUES (?,?)'
+    const queryInsert = 'INSERT IGNORE INTO subscriptions(id_user,id_course) VALUES (?,?)'
 	const [result] = await sql.query(queryInsert,[req.uid,req.params.id]);
 	//console.log(result)
     res.json({error:false, id:result.insertId})

@@ -20,8 +20,8 @@ async function get_all_courses(req, res, next) {
     //Obtener cursos donde el autor sea el usuario logeado
     const query = `SELECT C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
         FROM courses C
-        INNER JOIN courses_users U ON U.id_course = C.id 
-        WHERE author=? ORDER BY U.last_date desc`	
+        INNER JOIN courses_users U ON U.id_course = C.id AND U.id_user = C.author
+        WHERE C.author=? ORDER BY U.last_date desc`	
 	console.log("All courses - User",req.uid);
 	const [courses] = await sql.query(query,[req.uid]);
     console.log(courses)
@@ -568,25 +568,25 @@ async function get_items_from_clipboard(req, res, next) {
 
 async function add_unit_to_clipboard(req, res, next) { 
     //console.log(add_unit_to_clipboard)
-    const query = `INSERT INTO units_users(id_user,id_unit) VALUES(?,?)`
+    const query = `INSERT IGNORE INTO units_users(id_user,id_unit) VALUES(?,?)`
     const [result] = await sql.query(query,[req.uid,req.body.id_unit]);
 	res.json({error:false});
 }
 
 async function add_page_to_clipboard(req, res, next) { 
-    const query = `INSERT INTO pages_users(id_user,id_page) VALUES(?,?)`
+    const query = `INSERT IGNORE INTO pages_users(id_user,id_page) VALUES(?,?)`
     const [result] = await sql.query(query,[req.uid,req.body.id_page]);
 	res.json({error:false});
 }
 
 async function add_card_to_clipboard(req, res, next) { 
-    const query = `INSERT INTO cards_users(id_user,id_card) VALUES(?,?)`
+    const query = `INSERT IGNORE INTO cards_users(id_user,id_card) VALUES(?,?)`
     const [result] = await sql.query(query,[req.uid,req.body.id_card]);
 	res.json({error:false});
 }
 
 async function add_item_to_clipboard(req, res, next) { 
-    const query = `INSERT INTO items_users(id_user,id_item) VALUES(?,?)`
+    const query = `INSERT IGNORE INTO items_users(id_user,id_item) VALUES(?,?)`
     const [result] = await sql.query(query,[req.uid,req.body.id_item]);
 	res.json({error:false});
 }
