@@ -16,8 +16,7 @@ async function add_subscription(req, res, next) {
     const query = 'SELECT * FROM subscriptions WHERE id_user=? AND id_course=?'	
 	//console.log(query);
 	const [rows] = await sql.query(query,[req.uid,req.params.id]);
-	const subscription = rows[0]
-	if (subscription) return res.status(400).json({error:true, mensaje:'Ya está suscrito a este curso'})
+	if (!rows[0]) return res.status(400).json({error:true, mensaje:'Ud. ya está suscrito a este curso'})
     */
     //Insertar en courses_users
     const queryCourses = 'INSERT IGNORE INTO courses_users(id_user,id_course) VALUES (?,?)'
@@ -30,34 +29,43 @@ async function add_subscription(req, res, next) {
 }
 
 async function get_subscriptions(req, res, next) {
-    //Este es un cambio para probar que todo va bien
     //Obtener todos los cursos a los cuales el usuario esta suscrito
-    const query = `SELECT S.last_date, C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
+    const querySubscriptions = `
+        SELECT S.last_date, C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
         FROM subscriptions S 
-        INNER JOIN courses C ON S.id_course = C.id 
+            INNER JOIN courses C ON S.id_course = C.id 
         WHERE S.id_user=? ORDER BY S.last_date desc`	
 	//console.log(query);
-	const [subscriptions] = await sql.query(query,[req.uid, req.uid]);
-    console.log("Subscriptios", subscriptions)
+	const [subscriptions] = await sql.query(querySubscriptions,[req.uid]);
+    //console.log("Subscriptios", subscriptions)
     res.json({error:false, subscriptions})
 }
 
 async function get_courses(req, res, next) {
     //Obtener todos los cursos a los cuales el usuario no esta suscrito
-    const query = `SELECT C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
-        FROM courses C LEFT JOIN (
-        SELECT id_course, id_user FROM subscriptions WHERE id_user=?) S
-        ON C.id = S.id_course 
+    const queryCourses = `SELECT C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
+        FROM courses C 
+            LEFT JOIN (
+                SELECT id_course, id_user FROM subscriptions WHERE id_user=?) S
+            ON C.id = S.id_course 
         WHERE S.id_course IS NULL ORDER BY C.created desc`	
 	//console.log(query);
-	const [courses] = await sql.query(query,[req.uid]);
+	const [courses] = await sql.query(queryCourses,[req.uid]);
     //console.log("other courses",courses)
     res.json({error:false, courses})
 }
 
 async function get_course(req, res, next) {
-    const query = `SELECT id, title, status, type, content, status, file, options, tags FROM courses WHERE id=?`  
-	const [course] = await sql.query(query,[req.params.id]);
+    //Verificar que el usuario esta suscrito al curso
+    const querySubscription = `
+        SELECT id_user FROM subscriptions 
+        WHERE id_course=? AND id_user=?`    
+    const [rows] = await sql.query(querySubscription,[req.params.id, req.uid]);
+    if (!rows[0]) return res.json({error:true, mensaje:'Ud. no está autorizado'})  
+    //Obtener curso
+    const queryCourse = `SELECT id, title, status, type, content, status, file, options, tags FROM courses WHERE id=?`  
+	const [course] = await sql.query(queryCourse,[req.params.id]);
+    //Obtener unidades
     const queryUnits = `SELECT id, title FROM units WHERE id_course=?`
     const [units] = await sql.query(queryUnits,[req.params.id]);
     course[0]["units"] = units
@@ -66,8 +74,15 @@ async function get_course(req, res, next) {
 }
 
 async function get_unit(req, res, next) {
-    const query = `SELECT id, title FROM units WHERE id=?`  
-	const [unit] = await sql.query(query,[req.params.id]);
+    const queryUnit = `SELECT id, id_course, title FROM units WHERE id=?`  
+	const [unit] = await sql.query(queryUnit,[req.params.id]);
+    //Verificar que el usuario esta suscrito al curso
+    const querySubscription = `
+        SELECT id_user FROM subscriptions 
+        WHERE id_course=? AND id_user=?`
+    const [rows] = await sql.query(querySubscription,[unit[0].id_course, req.uid]);
+    if (!rows[0]) return res.json({error:true, mensaje:'Ud. no está autorizado'}) 
+    //Obtener paginas    
     const queryPages = `SELECT id, title FROM pages WHERE id_unit=?`
     const [pages] = await sql.query(queryPages,[req.params.id]);
     unit[0]["pages"] = pages
@@ -76,8 +91,20 @@ async function get_unit(req, res, next) {
 }
 
 async function get_page(req, res, next) {
-    const query = `SELECT id, title FROM pages WHERE id=?`  
-	const [page] = await sql.query(query,[req.params.id]);
+    const queryPage = `
+        SELECT pages.id, pages.id_unit, pages.title, units.id_course
+        FROM pages     
+            INNER JOIN units 
+                ON units.id = pages.id_unit
+        WHERE pages.id=?`  
+	const [page] = await sql.query(queryPage,[req.params.id]);
+    //Verificar que el usuario esta suscrito al curso
+    const querySubscription = `
+        SELECT id_user FROM subscriptions 
+        WHERE id_course=? AND id_user=?`
+    const [rows] = await sql.query(querySubscription,[page[0].id_course, req.uid]);
+    if (!rows[0]) return res.json({error:true, mensaje:'Ud. no está autorizado'}) 
+    //Obtener cards
     const queryCards = `SELECT id, title FROM cards WHERE id_page=?`
     const [cards] = await sql.query(queryCards,[req.params.id]);
     page[0]["cards"] = cards
@@ -86,8 +113,22 @@ async function get_page(req, res, next) {
 }
 
 async function get_card(req, res, next) {
-    const query = `SELECT id, title FROM cards WHERE id=?`  
-	const [card] = await sql.query(query,[req.params.id]);
+    const queryCard = `
+        SELECT cards.id, cards.id_page, cards.title, units.id_course 
+        FROM cards 
+            INNER JOIN pages 
+                ON pages.id = cards.id_page
+            INNER JOIN units 
+                ON units.id = pages.id_unit
+        WHERE cards.id=?`  
+	const [card] = await sql.query(queryCard,[req.params.id]);
+    //Verificar que el usuario esta suscrito al curso
+    const querySubscription = `
+        SELECT id_user FROM subscriptions 
+        WHERE id_course=? AND id_user=?`
+    const [rows] = await sql.query(querySubscription,[card[0].id_course, req.uid]);
+    if (!rows[0]) return res.json({error:true, mensaje:'Ud. no está autorizado'}) 
+    //Obtener items
     const queryItems = `SELECT id, type, content, fcontent, options, file, url FROM items WHERE id_card=?`
     const [items] = await sql.query(queryItems,[req.params.id]);
     card[0]["items"] = items

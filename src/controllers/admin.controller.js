@@ -18,19 +18,25 @@ const sql = mysql.createPool({
 
 async function get_all_courses(req, res, next) {
     //Obtener cursos donde el autor sea el usuario logeado
-    const query = `SELECT C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
+    const queryCourses = `SELECT C.id, C.title, C.status, C.type, C.content, C.status, C.file, C.options, C.tags, C.author 
         FROM courses C
-        INNER JOIN courses_users U ON U.id_course = C.id AND U.id_user = C.author
+        INNER JOIN courses_users U 
+            ON U.id_course = C.id AND U.id_user = C.author
         WHERE C.author=? ORDER BY U.last_date desc`	
-	console.log("All courses - User",req.uid);
-	const [courses] = await sql.query(query,[req.uid]);
-    console.log(courses)
+	//console.log("All courses - User",req.uid);
+	const [courses] = await sql.query(queryCourses,[req.uid]);
+    //console.log(courses)
     res.json({error:false, courses})
 }
 
 async function get_course(req, res, next) {
-    const query = `SELECT id, title, status, type, content, status, file, options, tags FROM courses WHERE id=?`  
-	const [course] = await sql.query(query,[req.params.id]);
+    //Obtener curso
+    const queryCourse = `SELECT id, author, title, status, type, content, status, file, options, tags FROM courses WHERE id=?`  
+	const [course] = await sql.query(queryCourse,[req.params.id]);
+    //Verificar el autor
+    if (course[0].author != req.uid)
+        return res.json({error:true, mensaje:'Ud. no está autorizado'})  
+    //Obtener unidades
     const queryUnits = `SELECT id, title FROM units WHERE id_course=? ORDER BY id`
     const [units] = await sql.query(queryUnits,[req.params.id]);
     course[0]["units"] = units
@@ -38,9 +44,19 @@ async function get_course(req, res, next) {
     res.json({error:false, course:course[0]})
 }
 
-async function get_unit(req, res, next) {
-    const query = `SELECT id, title FROM units WHERE id=?`  
-	const [unit] = await sql.query(query,[req.params.id]);
+async function get_unit(req, res, next) {   
+    //obtener la unidad
+    const queryUnit = `
+        SELECT units.id, units.id_course, units.title, courses.author 
+        FROM units
+            INNER JOIN courses 
+                ON courses.id = units.id_course
+        WHERE units.id=?`	
+	const [unit] = await sql.query(queryUnit,[req.params.id]);
+    //Verificar el autor   
+    if (unit[0].author != req.uid)
+        return res.json({error:true, mensaje:'Ud. no está autorizado'})  
+    //Obtener las paginas
     const queryPages = `SELECT id, title FROM pages WHERE id_unit=? ORDER BY id`
     const [pages] = await sql.query(queryPages,[req.params.id]);
     unit[0]["pages"] = pages
@@ -49,8 +65,20 @@ async function get_unit(req, res, next) {
 }
 
 async function get_page(req, res, next) {
-    const query = `SELECT id, title FROM pages WHERE id=?`  
-	const [page] = await sql.query(query,[req.params.id]);
+    //Obtener la pagina
+    const queryPage = `
+        SELECT pages.id, pages.id_unit, pages.title, courses.author
+        FROM pages 
+            INNER JOIN units 
+                ON units.id = pages.id_unit
+            INNER JOIN courses 
+                ON courses.id = units.id_course
+        WHERE pages.id=?`  
+	const [page] = await sql.query(queryPage,[req.params.id]);
+    //Verificar el autor  
+    if (page[0].author != req.uid)
+        return res.json({error:true, mensaje:'Ud. no está autorizado'})
+    //Obtener los cards
     const queryCards = `SELECT id, title FROM cards WHERE id_page=? ORDER BY id`
     const [cards] = await sql.query(queryCards,[req.params.id]);
     page[0]["cards"] = cards
@@ -59,8 +87,22 @@ async function get_page(req, res, next) {
 }
 
 async function get_card(req, res, next) {
-    const query = `SELECT id, title FROM cards WHERE id=?`  
-	const [card] = await sql.query(query,[req.params.id]);
+    //Obtener el card 
+    const queryCard = `
+        SELECT cards.id, cards.id_page, cards.title, courses.author 
+        FROM cards 
+            INNER JOIN pages 
+                ON pages.id = cards.id_page
+            INNER JOIN units 
+                ON units.id = pages.id_unit
+            INNER JOIN courses 
+                ON courses.id = units.id_course        
+        WHERE cards.id=?`  
+	const [card] = await sql.query(queryCard,[req.params.id]);
+    //Verificar el autor  
+    if (card[0].author != req.uid)
+        return res.json({error:true, mensaje:'Ud. no está autorizado'})
+    //Obtener los items
     const queryItems = `SELECT id, type, content, fcontent, options, file, url FROM items WHERE id_card=? ORDER BY id`
     const [items] = await sql.query(queryItems,[req.params.id]);
     card[0]["items"] = items
