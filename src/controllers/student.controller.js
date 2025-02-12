@@ -15,15 +15,15 @@ async function add_subscription(req, res, next) {
     /*
     const query = 'SELECT * FROM subscriptions WHERE id_user=? AND id_course=?'	
 	//console.log(query);
-	const [rows] = await sql.query(query,[req.uid,req.params.id]);
+	const [rows] = await sql.query(query,[req.uid,req.body.id]);
 	if (!rows[0]) return res.status(400).json({error:true, mensaje:'Ud. ya está suscrito a este curso'})
     */
     //Insertar en courses_users
     const queryCourses = 'INSERT IGNORE INTO courses_users(id_user,id_course) VALUES (?,?)'
-	const [result2] = await sql.query(queryCourses,[req.uid,req.params.id]);
+	const [result2] = await sql.query(queryCourses,[req.uid,req.body.id]);
     //Suscribir curso al usuario logeado 
     const queryInsert = 'INSERT IGNORE INTO subscriptions(id_user,id_course) VALUES (?,?)'
-	const [result] = await sql.query(queryInsert,[req.uid,req.params.id]);
+	const [result] = await sql.query(queryInsert,[req.uid,req.body.id]);
 	//console.log(result)
     res.json({error:false, id:result.insertId})
 }
@@ -168,14 +168,14 @@ async function update_last_card(req, res, next) {
             INNER JOIN courses
                 ON courses.id = units.id_course
             WHERE cards.id = ?`
-    const [course] = await sql.query(querySelect,[req.params.id]);
+    const [course] = await sql.query(querySelect,[req.body.id]);
     let id_course = course[0].id
     const queryInsert = `INSERT IGNORE INTO courses_users(id_course, id_user, last_card, last_date) VALUES (?,?,?,?)`
-    const [result1] = await sql.query(queryInsert,[id_course, req.uid, req.params.id, moment().format('YYYY-MM-DD hh:mm:ss')]);
+    const [result1] = await sql.query(queryInsert,[id_course, req.uid, req.body.id, moment().format('YYYY-MM-DD hh:mm:ss')]);
     const queryUpdate = `UPDATE courses_users SET last_card=?, last_date=? WHERE id_course=? AND id_user=?`
-    const [result2] = await sql.query(queryUpdate,[req.params.id, moment().format('YYYY-MM-DD hh:mm:ss'), id_course, req.uid]);
+    const [result2] = await sql.query(queryUpdate,[req.body.id, moment().format('YYYY-MM-DD hh:mm:ss'), id_course, req.uid]);
     const querySubscriptions = `UPDATE subscriptions SET last_card=?, last_date=? WHERE id_course=? AND id_user=?`
-    const [result3] = await sql.query(querySubscriptions,[req.params.id, moment().format('YYYY-MM-DD hh:mm:ss'), id_course, req.uid]);
+    const [result3] = await sql.query(querySubscriptions,[req.body.id, moment().format('YYYY-MM-DD hh:mm:ss'), id_course, req.uid]);
     //console.log("update_last_card",id_course)
     res.json({error:false})
 }

@@ -10,8 +10,9 @@ router.get('/unit/:id', controller.get_unit);
 router.get('/page/:id', controller.get_page);
 router.get('/card/:id', controller.get_card);
 router.get('/last/cards', controller.get_last_cards);
-router.get('/user/update/card/:id', controller.update_last_card);
+
 router.post('/protected', controller.infoUser);
-router.get('/subscription/add/:id', controller.add_subscription);
+router.post('/subscription/add', controller.add_subscription);
+router.post('/user/update/card', controller.update_last_card);
 
 module.exports = router;
